@@ -86,6 +86,12 @@ public class StatusUpdateTask implements Task, Initializable {
 		}
 	}
 
+	/**
+	 * 每隔一段时间监控一次线程池信息 wenyixicodedog
+	 *
+	 * @author: heyongliu
+	 * @date: 2022/3/11
+	 */
 	private void buildExtensionData(StatusInfo status) {
 		StatusExtensionRegister res = StatusExtensionRegister.getInstance();
 		List<StatusExtension> extensions = res.getStatusExtension();
@@ -180,7 +186,7 @@ public class StatusUpdateTask implements Task, Initializable {
 
 				try {
 					status.accept(collector.setDumpLocked(m_manager.isDumpLocked()));
-
+					// 每隔一段时间监控一次线程池信息 wenyixicodedog
 					buildExtensionData(status);
 					h.addData(status.toString());
 					h.setStatus(Message.SUCCESS);
