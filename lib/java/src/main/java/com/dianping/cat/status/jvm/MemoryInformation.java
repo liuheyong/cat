@@ -25,6 +25,8 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 
 public class MemoryInformation {
+    private static final String DIRECT_BUFFER_MBEAN = "java.nio:type=BufferPool,name=direct";
+    private static final String MAPPED_BUFFER_MBEAN = "java.nio:type=BufferPool,name=mapped";
     private final long usedMemory;
     private final long maxMemory;
     private final long usedOldGen;
@@ -42,8 +44,6 @@ public class MemoryInformation {
     private long usedCodeCache;
     private long maxCodeCache;
     private MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-    private static final String DIRECT_BUFFER_MBEAN = "java.nio:type=BufferPool,name=direct";
-    private static final String MAPPED_BUFFER_MBEAN = "java.nio:type=BufferPool,name=mapped";
 
     public MemoryInformation() {
         usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
