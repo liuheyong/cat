@@ -28,6 +28,9 @@ public class HttpStats {
     private AtomicInteger httpCount = new AtomicInteger();
     private AtomicLong httpTimeSum = new AtomicLong();
 
+    private HttpStats() {
+    }
+
     public static HttpStats currentStatsHolder() {
         if (null == current) {
             synchronized (HttpStats.class) {
@@ -44,9 +47,6 @@ public class HttpStats {
         HttpStats old = currentStatsHolder();
         current = tmp;
         return old;
-    }
-
-    private HttpStats() {
     }
 
     public void doRequestStats(long mills, int status) {

@@ -21,13 +21,13 @@ package com.dianping.cat.servlet;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.configuration.client.entity.Server;
-import com.dianping.cat.status.http.HttpStats;
-import com.dianping.cat.util.Joiners;
-import com.dianping.cat.util.UrlParser;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.internal.DefaultMessageManager;
 import com.dianping.cat.message.internal.DefaultTransaction;
+import com.dianping.cat.status.http.HttpStats;
+import com.dianping.cat.util.Joiners;
+import com.dianping.cat.util.UrlParser;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -38,13 +38,13 @@ import java.util.List;
 import java.util.Set;
 
 public class CatFilter implements Filter {
+
     private String servers;
     private Set<String> excludeUrls;
     private Set<String> excludePrefixes;
 
     private void customizeStatus(Transaction t, HttpServletRequest req) {
         Object catStatus = req.getAttribute(CatConstants.CAT_STATE);
-
         if (catStatus != null) {
             t.setStatus(catStatus.toString());
         } else {
@@ -55,13 +55,10 @@ public class CatFilter implements Filter {
     private void customizeUri(Transaction t, HttpServletRequest req) {
         if (t instanceof DefaultTransaction) {
             Object catPageType = req.getAttribute(CatConstants.CAT_PAGE_TYPE);
-
             if (catPageType instanceof String) {
                 ((DefaultTransaction) t).setType(catPageType.toString());
             }
-
             Object catPageUri = req.getAttribute(CatConstants.CAT_PAGE_URI);
-
             if (catPageUri instanceof String) {
                 ((DefaultTransaction) t).setName(catPageUri.toString());
             }
@@ -73,23 +70,19 @@ public class CatFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
             chain.doFilter(request, response);
             return;
         }
-
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         String path = req.getRequestURI();
         boolean exclude = excludePath(path);
-
         if (exclude) {
             chain.doFilter(request, response);
             return;
         }
-
         logTransaction(chain, req, res);
     }
 
@@ -116,7 +109,6 @@ public class CatFilter implements Filter {
             if (servers == null) {
                 DefaultMessageManager manager = (DefaultMessageManager) Cat.getManager();
                 List<Server> servers = manager.getConfigService().getServers();
-
                 this.servers = Joiners.by(',').join(servers, new Joiners.IBuilder<Server>() {
                     @Override
                     public String asString(Server server) {
@@ -127,7 +119,6 @@ public class CatFilter implements Filter {
                     }
                 });
             }
-
             return servers;
         } catch (Exception e) {
             return null;
@@ -141,14 +132,11 @@ public class CatFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
         String exclude = filterConfig.getInitParameter("exclude");
-
         if (exclude != null) {
-            excludeUrls = new HashSet<String>();
+            excludeUrls = new HashSet<>();
             String[] excludeUrls = exclude.split(";");
-
             for (String s : excludeUrls) {
                 int index = s.indexOf("*");
-
                 if (index > 0) {
                     if (excludePrefixes == null) {
                         excludePrefixes = new HashSet<String>();
@@ -163,10 +151,8 @@ public class CatFilter implements Filter {
 
     private void logCatMessageId(HttpServletResponse res) {
         boolean isTraceMode = Cat.getManager().isTraceMode();
-
         if (isTraceMode) {
             String id = Cat.getCurrentMessageId();
-
             res.setHeader("X-CAT-ROOT-ID", id);
             res.setHeader("X-CAT-SERVER", getCatServer());
         }
@@ -176,10 +162,8 @@ public class CatFilter implements Filter {
         try {
             if (top) {
                 logRequestClientInfo(req, type);
-                logRequestPayload(req, type);
-            } else {
-                logRequestPayload(req, type);
             }
+            logRequestPayload(req, type);
         } catch (Exception e) {
             Cat.logError(e);
         }
@@ -189,19 +173,16 @@ public class CatFilter implements Filter {
         StringBuilder sb = new StringBuilder(1024);
         String ip = "";
         String ipForwarded = req.getHeader("x-forwarded-for");
-
         if (ipForwarded == null) {
             ip = req.getRemoteAddr();
         } else {
             ip = ipForwarded;
         }
-
         sb.append("IPS=").append(ip);
         sb.append("&VirtualIP=").append(req.getRemoteAddr());
         sb.append("&Server=").append(req.getServerName());
         sb.append("&Referer=").append(req.getHeader("referer"));
         sb.append("&Agent=").append(req.getHeader("user-agent"));
-
         Cat.logEvent(type, type + ".Server", Message.SUCCESS, sb.toString());
     }
 
@@ -216,7 +197,6 @@ public class CatFilter implements Filter {
         if (qs != null) {
             sb.append('?').append(qs);
         }
-
         Cat.logEvent(type, type + ".Method", Message.SUCCESS, sb.toString());
     }
 
@@ -229,8 +209,7 @@ public class CatFilter implements Filter {
         }
     }
 
-    private void logTransaction(FilterChain chain, HttpServletRequest req, HttpServletResponse response)
-            throws ServletException, IOException {
+    private void logTransaction(FilterChain chain, HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
         Message message = Cat.getManager().getThreadLocalMessageTree().getMessage();
         boolean top = message == null;
         String type;
@@ -248,19 +227,13 @@ public class CatFilter implements Filter {
         }
 
         Transaction t = Cat.newTransaction(type, getRequestURI(req));
-
         try {
             logPayload(req, top, type);
             logCatMessageId(res);
             chain.doFilter(req, res);
             customizeStatus(t, req);
-        } catch (ServletException e) {
+        } catch (ServletException | IOException e) {
             status = 500;
-            t.setStatus(e);
-            Cat.logError(e);
-            throw e;
-        } catch (IOException e) {
-        	status = 500;
             t.setStatus(e);
             Cat.logError(e);
             throw e;
@@ -272,10 +245,8 @@ public class CatFilter implements Filter {
         } finally {
             customizeUri(t, req);
             t.complete();
-
             long end = System.currentTimeMillis();
             stats.doRequestStats(end - start, status > 0 ? status : res.getCurrentStatus());
         }
     }
-
 }

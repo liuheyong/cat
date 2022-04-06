@@ -20,6 +20,12 @@ package com.dianping.cat.status;
 
 import java.util.Map;
 
+/**
+ * 监控扩展顶级接口
+ *
+ * @author: heyongliu
+ * @date: 2022/4/6
+ */
 public interface StatusExtension {
 
     String getDescription();

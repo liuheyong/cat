@@ -31,6 +31,8 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.internal.DefaultMessageProducer;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.io.ChannelManager;
+import com.dianping.cat.status.datasource.c3p0.C3P0InfoCollector;
+import com.dianping.cat.status.datasource.druid.DruidInfoCollector;
 import com.dianping.cat.status.http.HttpStatsCollector;
 import com.dianping.cat.status.jvm.ClassLoadingInfoCollector;
 import com.dianping.cat.status.jvm.JvmInfoCollector;
@@ -39,12 +41,10 @@ import com.dianping.cat.status.jvm.ThreadInfoWriter;
 import com.dianping.cat.status.model.entity.CustomInfo;
 import com.dianping.cat.status.model.entity.Extension;
 import com.dianping.cat.status.model.entity.StatusInfo;
-import com.dianping.cat.util.Threads;
-import io.netty.channel.ChannelFuture;
-import com.dianping.cat.status.datasource.c3p0.C3P0InfoCollector;
-import com.dianping.cat.status.datasource.druid.DruidInfoCollector;
 import com.dianping.cat.status.system.ProcessorInfoCollector;
 import com.dianping.cat.status.system.StaticInfoCollector;
+import com.dianping.cat.util.Threads;
+import io.netty.channel.ChannelFuture;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -57,10 +57,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class StatusUpdateTask implements Threads.Task {
+    private static CatLogger LOGGER = CatLogger.getInstance();
     private ClientConfigService configService = DefaultClientConfigService.getInstance();
     private ChannelManager channelManager = ChannelManager.getInstance();
     private boolean active = true;
-    private static CatLogger LOGGER = CatLogger.getInstance();
 
     public StatusUpdateTask() {
         initialize();
@@ -84,7 +84,6 @@ public class StatusUpdateTask implements Threads.Task {
 
             try {
                 Map<String, String> properties = extension.getProperties();
-
                 if (properties.size() > 0) {
                     String id = extension.getId();
                     String des = extension.getDescription();

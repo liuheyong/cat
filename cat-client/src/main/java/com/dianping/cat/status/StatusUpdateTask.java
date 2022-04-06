@@ -83,9 +83,7 @@ public class StatusUpdateTask implements Task, Initializable {
     private void buildExtensionData(StatusInfo status) {
         StatusExtensionRegister res = StatusExtensionRegister.getInstance();
         List<StatusExtension> extensions = res.getStatusExtension();
-        int length = extensions.size();
-        for (int i = 0; i < length; i++) {
-            StatusExtension extension = extensions.get(i);
+        for (StatusExtension extension : extensions) {
             String id = extension.getId();
             String des = extension.getDescription();
             Map<String, String> propertis = extension.getProperties();
