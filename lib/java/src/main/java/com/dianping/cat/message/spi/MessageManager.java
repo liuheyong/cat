@@ -30,6 +30,7 @@ import com.dianping.cat.message.internal.DefaultMessageManager;
  * Notes: This method is reserved for internal usage only. Application developer should never call this method directly.
  */
 public interface MessageManager {
+
     void add(Message message);
 
     void end(Transaction transaction);
@@ -50,9 +51,9 @@ public interface MessageManager {
 
     boolean isTraceMode();
 
-    void reset();
-
     void setTraceMode(boolean traceMode);
+
+    void reset();
 
     void setup();
 

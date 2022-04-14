@@ -229,7 +229,6 @@ public class StatusUpdateTask implements Threads.Task {
         try {
             long current = System.currentTimeMillis() / 1000 / 60;
             int min = (int) (current % (60));
-
             if (min % 3 == 0) {
                 configService.refreshConfig();
             }

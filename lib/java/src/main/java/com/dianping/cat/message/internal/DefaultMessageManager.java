@@ -35,28 +35,28 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultMessageManager implements MessageManager {
+    private static final int SIZE = 2000;
+    private static final long HOUR = 3600 * 1000L;
+    private static CatLogger LOGGER = CatLogger.getInstance();
+    private static MessageManager INSTANCE = new DefaultMessageManager();
     private long throttleTimes;
     private String domain;
     private String hostName;
     private String ip;
     private boolean firstMessage = true;
-    private static final int SIZE = 2000;
-    private static final long HOUR = 3600 * 1000L;
     private ClientConfigService configService = DefaultClientConfigService.getInstance();
     private TcpSocketSender sender = TcpSocketSender.getInstance();
     private MessageIdFactory factory = MessageIdFactory.getInstance();
     private AtomicInteger sampleCount = new AtomicInteger();
-    private ThreadLocal<Context> context = new ThreadLocal<Context>();
-    private static CatLogger LOGGER = CatLogger.getInstance();
+    private ThreadLocal<Context> context = new ThreadLocal<>();
     private TransactionHelper validator = new TransactionHelper();
-    private static MessageManager INSTANCE = new DefaultMessageManager();
-
-    public static MessageManager getInstance() {
-        return INSTANCE;
-    }
 
     private DefaultMessageManager() {
         initialize();
+    }
+
+    public static MessageManager getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -117,6 +117,9 @@ public class DefaultMessageManager implements MessageManager {
 
     public String getMetricType() {
         return "";
+    }
+
+    public void setMetricType(String metricType) {
     }
 
     @Override
@@ -190,6 +193,14 @@ public class DefaultMessageManager implements MessageManager {
         }
     }
 
+    public void setTraceMode(boolean traceMode) {
+        Context context = getContext();
+
+        if (context != null) {
+            context.setTraceMode(traceMode);
+        }
+    }
+
     private String nextMessageId() {
         return factory.getNextId();
     }
@@ -210,17 +221,6 @@ public class DefaultMessageManager implements MessageManager {
 
         if (ctx != null) {
             ctx.reset();
-        }
-    }
-
-    public void setMetricType(String metricType) {
-    }
-
-    public void setTraceMode(boolean traceMode) {
-        Context context = getContext();
-
-        if (context != null) {
-            context.setTraceMode(traceMode);
         }
     }
 
@@ -402,6 +402,10 @@ public class DefaultMessageManager implements MessageManager {
             return traceMode;
         }
 
+        public void setTraceMode(boolean traceMode) {
+            this.traceMode = traceMode;
+        }
+
         public boolean notExsitCause(Throwable e) {
             if (knownExceptions == null) {
                 knownExceptions = new HashSet<Throwable>();
@@ -428,7 +432,6 @@ public class DefaultMessageManager implements MessageManager {
                 knownExceptions.clear();
             }
             stack.clear();
-
             tree.setDomain(domain);
             tree.setIpAddress(ip);
             tree.setHostName(hostName);
@@ -457,17 +460,12 @@ public class DefaultMessageManager implements MessageManager {
             }
         }
 
-        public void setTraceMode(boolean traceMode) {
-            this.traceMode = traceMode;
-        }
-
         public void start(Transaction transaction, boolean forked) {
             if (!stack.isEmpty()) {
                 // Do NOT make strong reference from parent transaction to forked transaction.
                 // Instead, we create a "soft" reference to forked transaction later, via linkAsRunAway()
                 // By doing so, there is no need for synchronization between parent and child threads.
                 // Both threads can complete() anytime despite the other thread.
-
                 if (!(transaction instanceof ForkedTransaction)) {
                     Transaction parent = stack.peek();
                     addTransactionChild(transaction, parent);
@@ -475,7 +473,6 @@ public class DefaultMessageManager implements MessageManager {
             } else {
                 tree.setMessage(transaction);
             }
-
             if (!forked) {
                 stack.push(transaction);
             }

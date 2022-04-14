@@ -75,7 +75,7 @@ public class StatusUpdateTask implements Task, Initializable {
     }
 
     /**
-     * 每隔一段时间监控一次线程池信息 wenyixicodedog
+     * 每隔一段时间监控一次线程池信息
      *
      * @author: heyongliu
      * @date: 2022/3/11
@@ -164,7 +164,7 @@ public class StatusUpdateTask implements Task, Initializable {
                 StatusInfoCollector collector = new StatusInfoCollector(m_statistics, m_jars);
                 try {
                     status.accept(collector.setDumpLocked(m_manager.isDumpLocked()));
-                    // 每隔一段时间监控一次线程池信息 wenyixicodedog
+                    // 每隔一段时间监控一次线程池信息
                     buildExtensionData(status);
                     h.addData(status.toString());
                     h.setStatus(Message.SUCCESS);

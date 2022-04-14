@@ -26,7 +26,7 @@ import java.util.Map;
 public class HttpStatsCollector extends AbstractCollector {
 
     private Map<String, Number> doClassLoadingCollect() {
-        Map<String, Number> map = new LinkedHashMap<String, Number>();
+        Map<String, Number> map = new LinkedHashMap<>();
         HttpStats stats = HttpStats.getAndReset();
         map.put("http.count", stats.getHttpCount());
         map.put("http.meantime", stats.getHttpMeantime());

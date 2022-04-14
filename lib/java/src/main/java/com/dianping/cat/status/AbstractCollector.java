@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 public abstract class AbstractCollector implements StatusExtension {
 
     protected Map<String, String> convert(Map<String, Number> map) {
-        Map<String, String> result = new LinkedHashMap<String, String>();
+        Map<String, String> result = new LinkedHashMap<>();
         for (Entry<String, Number> entry : map.entrySet()) {
             result.put(entry.getKey(), entry.getValue().toString());
         }
