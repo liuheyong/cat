@@ -107,7 +107,6 @@ public class Cat {
     public static String getCurrentMessageId() {
         try {
             MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-
             if (tree != null) {
                 String messageId = tree.getMessageId();
 
@@ -201,8 +200,7 @@ public class Cat {
     }
 
     public static void initialize(String... servers) {
-        File configFile = null;
-
+        File configFile;
         try {
             configFile = File.createTempFile("cat-client", ".xml");
             ClientConfig config = new ClientConfig().setMode("client");
@@ -212,7 +210,6 @@ public class Cat {
             }
 
             Files.forIO().writeTo(configFile, config.toString());
-
             initialize(configFile);
         } catch (Exception e) {
             errorHandler(e);
@@ -221,7 +218,7 @@ public class Cat {
 
     public static void initializeByDomain(String domain, int port, int httpPort, String... servers) {
         try {
-            File configFile = null;
+            File configFile;
             try {
                 configFile = File.createTempFile("cat-client", ".xml");
             } catch (Exception ex) {
@@ -373,8 +370,8 @@ public class Cat {
     /**
      * logRemoteCallClient is used in rpc client
      *
-     * @param ctx ctx is rpc context ,such as duboo context , please use rpc context implement Context
-     * @param ctx domain is default, if use default config, the performance of server storage is bad。
+     * @param ctx    ctx is rpc context ,such as duboo context , please use rpc context implement Context
+     * @param domain domain is default, if use default config, the performance of server storage is bad。
      */
     public static void logRemoteCallClient(Context ctx) {
         logRemoteCallClient(ctx, "default");
@@ -550,6 +547,12 @@ public class Cat {
         }
     }
 
+    /**
+     * RPC上下文
+     *
+     * @author: heyongliu
+     * @date: 2022/4/18
+     */
     public static interface Context {
 
         public final String ROOT = "_catRootMessageId";

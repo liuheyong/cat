@@ -81,11 +81,25 @@ public interface Transaction extends Message {
     long getDurationInMicros();
 
     /**
+     * set duration in microsecond.
+     *
+     * @return duration time in microsecond.
+     */
+    void setDurationInMicros(long durationInMicros);
+
+    /**
      * How long the transaction took from construction to complete. Time unit is millisecond.
      *
      * @return duration time in millisecond
      */
     long getDurationInMillis();
+
+    /**
+     * set duration in millisecond.
+     *
+     * @return duration time in millisecond
+     */
+    void setDurationInMillis(long durationInMills);
 
     /**
      * How long the transaction took from construction, even not completed. Time unit is microsecond.
@@ -100,20 +114,6 @@ public interface Transaction extends Message {
      * @return true if child exists, else false.
      */
     boolean hasChildren();
-
-    /**
-     * set duration in microsecond.
-     *
-     * @return duration time in microsecond.
-     */
-    void setDurationInMicros(long durationInMicros);
-
-    /**
-     * set duration in millisecond.
-     *
-     * @return duration time in millisecond
-     */
-    void setDurationInMillis(long durationInMills);
 
     /**
      * set start time in transaction.

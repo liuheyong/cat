@@ -36,6 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MessageIdFactory {
+    private static final long HOUR = 3600 * 1000L;
+    private static MessageIdFactory INSTANCE = new MessageIdFactory();
     private volatile long timestamp = getTimestamp();
     private volatile AtomicInteger index = new AtomicInteger(0);
     private String domain = "UNKNOWN";
@@ -45,15 +47,13 @@ public class MessageIdFactory {
     private int retry;
     private String idPrefix;
     private String idPrefixOfMultiMode;
-    private static final long HOUR = 3600 * 1000L;
-    private static MessageIdFactory INSTANCE = new MessageIdFactory();
-    private Map<String, AtomicInteger> map = new ConcurrentHashMap<String, AtomicInteger>(100);
+    private Map<String, AtomicInteger> map = new ConcurrentHashMap<>(100);
+
+    private MessageIdFactory() {
+    }
 
     public static MessageIdFactory getInstance() {
         return INSTANCE;
-    }
-
-    private MessageIdFactory() {
     }
 
     public void close() {

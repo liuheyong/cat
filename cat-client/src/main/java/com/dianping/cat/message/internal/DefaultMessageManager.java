@@ -188,12 +188,10 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
     @Override
     public MessageTree getThreadLocalMessageTree() {
         Context ctx = m_context.get();
-
         if (ctx == null) {
             setup();
         }
         ctx = m_context.get();
-
         return ctx.m_tree;
     }
 
@@ -316,14 +314,12 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
     @Override
     public void setup() {
         Context ctx;
-
         if (m_domain != null) {
             ctx = new Context(m_domain.getId(), m_hostName, m_domain.getIp());
         } else {
             ctx = new Context("Unknown", m_hostName, "");
         }
         double samplingRate = m_configManager.getSampleRatio();
-
         if (samplingRate < 1.0 && hitSample(samplingRate)) {
             ctx.m_tree.setHitSample(true);
         }
@@ -373,8 +369,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
 
         public Context(String domain, String hostName, String ipAddress) {
             m_tree = new DefaultMessageTree();
-            m_stack = new Stack<Transaction>();
-
+            m_stack = new Stack<>();
             Thread thread = Thread.currentThread();
             String groupName = thread.getThreadGroup().getName();
 
@@ -386,18 +381,16 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
             m_tree.setHostName(hostName);
             m_tree.setIpAddress(ipAddress);
             m_length = 1;
-            m_knownExceptions = new HashSet<Throwable>();
+            m_knownExceptions = new HashSet<>();
         }
 
         public void add(Message message) {
             if (m_stack.isEmpty()) {
                 MessageTree tree = m_tree.copy();
-
                 tree.setMessage(message);
                 flush(tree, true);
             } else {
                 Transaction parent = m_stack.peek();
-
                 addTransactionChild(message, parent);
             }
         }
@@ -409,7 +402,6 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
             if (treePeriod < messagePeriod || m_length >= ApplicationSettings.getTreeLengthLimit()) {
                 m_validator.truncateAndFlush(this, message.getTimestamp());
             }
-
             transaction.addChild(message);
             m_length++;
         }
@@ -441,7 +433,6 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
                 } else {
                     while (transaction != current && !m_stack.empty()) {
                         m_validator.validate(m_stack.peek(), current);
-
                         current = m_stack.pop();
                     }
                 }
@@ -460,7 +451,6 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -510,7 +500,6 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
             } else {
                 m_tree.setMessage(transaction);
             }
-
             if (!forked) {
                 m_stack.push(transaction);
             }
@@ -524,13 +513,11 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
     class TransactionHelper {
         private void linkAsRunAway(DefaultForkedTransaction transaction) {
             DefaultEvent event = new DefaultEvent("RemoteCall", "RunAway");
-
             event.addData(transaction.getForkedMessageId(), transaction.getType() + ":" + transaction.getName());
             event.setTimestamp(transaction.getTimestamp());
             event.setStatus(Message.SUCCESS);
             event.setCompleted(true);
             transaction.setStandalone(true);
-
             add(event);
         }
 
@@ -561,8 +548,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
                 if (child != current) {
                     target.addChild(child);
                 } else {
-                    DefaultTransaction cloned = new DefaultTransaction(current.getType(), current.getName(),
-                            DefaultMessageManager.this);
+                    DefaultTransaction cloned = new DefaultTransaction(current.getType(), current.getName(), DefaultMessageManager.this);
 
                     cloned.setTimestamp(current.getTimestamp());
                     cloned.setDurationInMicros(current.getDurationInMicros());
@@ -576,7 +562,6 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
             }
 
             source.getChildren().clear();
-
             if (shouldKeep) { // add it back
                 source.addChild(current);
             }
@@ -641,9 +626,7 @@ public class DefaultMessageManager extends ContainerHolder implements MessageMan
                 List<Message> children = transaction.getChildren();
                 int len = children.size();
 
-                for (int i = 0; i < len; i++) {
-                    Message message = children.get(i);
-
+                for (Message message : children) {
                     if (message instanceof Transaction) {
                         validate(transaction, (Transaction) message);
                     }

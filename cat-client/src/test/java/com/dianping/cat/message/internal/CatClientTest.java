@@ -18,20 +18,6 @@
  */
 package com.dianping.cat.message.internal;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Queue;
-
-import com.dianping.cat.message.spi.MessageQueue;
-import junit.framework.Assert;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.unidal.helper.Files;
-import org.unidal.helper.Reflects;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.client.entity.ClientConfig;
 import com.dianping.cat.configuration.client.entity.Domain;
@@ -40,82 +26,94 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.MessageProducer;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.io.TransportManager;
+import com.dianping.cat.message.spi.MessageQueue;
 import com.dianping.cat.message.spi.MessageTree;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import org.unidal.helper.Files;
+import org.unidal.helper.Reflects;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Queue;
 
 @RunWith(JUnit4.class)
 public class CatClientTest extends CatTestCase {
-	private Queue<MessageTree> m_queue;
+    private Queue<MessageTree> m_queue;
 
-	@BeforeClass
-	public static void beforeClass() throws IOException {
-		ClientConfig clientConfig = new ClientConfig();
+    @BeforeClass
+    public static void beforeClass() throws IOException {
+        ClientConfig clientConfig = new ClientConfig();
 
-		clientConfig.setMode("client");
-		clientConfig.addDomain(new Domain("Test").setEnabled(true));
+        clientConfig.setMode("client");
+        clientConfig.addDomain(new Domain("Test").setEnabled(true));
 
-		File configFile = new File(Cat.getCatHome(),"client.xml").getCanonicalFile();
+        File configFile = new File(Cat.getCatHome(), "client.xml").getCanonicalFile();
 
-		configFile.getParentFile().mkdirs();
+        configFile.getParentFile().mkdirs();
 
-		Files.forIO().writeTo(configFile, clientConfig.toString());
+        Files.forIO().writeTo(configFile, clientConfig.toString());
 
-		// Cat.destroy();
-		Cat.initialize(configFile);
-	}
+        // Cat.destroy();
+        Cat.initialize(configFile);
+    }
 
-	@Before
-	public void before() throws Exception {
-		TransportManager manager = Cat.lookup(TransportManager.class);
-		MessageQueue queue = Reflects.forField()
-								.getDeclaredFieldValue(manager.getSender().getClass(), "m_queue",	manager.getSender());
+    @Before
+    public void before() throws Exception {
+        TransportManager manager = Cat.lookup(TransportManager.class);
+        MessageQueue queue = Reflects.forField()
+                .getDeclaredFieldValue(manager.getSender().getClass(), "m_queue", manager.getSender());
 
-		m_queue = Reflects.forField().getDeclaredFieldValue(queue.getClass(), "m_queue", queue);
-	}
+        m_queue = Reflects.forField().getDeclaredFieldValue(queue.getClass(), "m_queue", queue);
+    }
 
-	public void testNormal() throws Exception {
-		MessageProducer producer = Cat.getProducer();
-		Transaction t = producer.newTransaction("URL", "MyPage");
+    public void testNormal() throws Exception {
+        MessageProducer producer = Cat.getProducer();
+        Transaction t = producer.newTransaction("URL", "MyPage");
 
-		try {
-			// do your business here
-			t.addData("k1", "v1");
-			t.addData("k2", "v2");
-			t.addData("k3", "v3");
+        try {
+            // do your business here
+            t.addData("k1", "v1");
+            t.addData("k2", "v2");
+            t.addData("k3", "v3");
 
-			Thread.sleep(20);
+            Thread.sleep(20);
 
-			producer.logEvent("URL", "Payload", Message.SUCCESS, "host=my-host&ip=127.0.0.1&agent=...");
-			t.setStatus(Message.SUCCESS);
-		} catch (Exception e) {
-			t.setStatus(e);
-		} finally {
-			t.complete();
-		}
+            producer.logEvent("URL", "Payload", Message.SUCCESS, "host=my-host&ip=127.0.0.1&agent=...");
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            t.setStatus(e);
+        } finally {
+            t.complete();
+        }
 
-		// please stop CAT server when you run this test case
-		Assert.assertEquals("One message should be in the queue.", 1, m_queue.size());
+        // please stop CAT server when you run this test case
+        Assert.assertEquals("One message should be in the queue.", 1, m_queue.size());
 
-		MessageTree tree = m_queue.poll();
-		Message m = tree.getMessage();
+        MessageTree tree = m_queue.poll();
+        Message m = tree.getMessage();
 
-		Assert.assertTrue(Transaction.class.isAssignableFrom(m.getClass()));
+        Assert.assertTrue(Transaction.class.isAssignableFrom(m.getClass()));
 
-		Transaction trans = (Transaction) m;
+        Transaction trans = (Transaction) m;
 
-		Assert.assertEquals("URL", trans.getType());
-		Assert.assertEquals("MyPage", trans.getName());
-		Assert.assertEquals("0", trans.getStatus());
-		Assert.assertTrue(trans.getDurationInMillis() > 0);
-		Assert.assertEquals("k1=v1&k2=v2&k3=v3", trans.getData().toString());
+        Assert.assertEquals("URL", trans.getType());
+        Assert.assertEquals("MyPage", trans.getName());
+        Assert.assertEquals("0", trans.getStatus());
+        Assert.assertTrue(trans.getDurationInMillis() > 0);
+        Assert.assertEquals("k1=v1&k2=v2&k3=v3", trans.getData().toString());
 
-		Assert.assertEquals(1, trans.getChildren().size());
+        Assert.assertEquals(1, trans.getChildren().size());
 
-		Message c = trans.getChildren().get(0);
+        Message c = trans.getChildren().get(0);
 
-		Assert.assertEquals("URL", c.getType());
-		Assert.assertEquals("Payload", c.getName());
-		Assert.assertEquals("0", c.getStatus());
-		Assert.assertEquals("host=my-host&ip=127.0.0.1&agent=...", c.getData().toString());
-	}
+        Assert.assertEquals("URL", c.getType());
+        Assert.assertEquals("Payload", c.getName());
+        Assert.assertEquals("0", c.getStatus());
+        Assert.assertEquals("host=my-host&ip=127.0.0.1&agent=...", c.getData().toString());
+    }
 
 }

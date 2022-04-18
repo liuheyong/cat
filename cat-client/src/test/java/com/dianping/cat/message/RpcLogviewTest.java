@@ -18,74 +18,74 @@
  */
 package com.dianping.cat.message;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.Cat.Context;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import com.dianping.cat.Cat;
-import com.dianping.cat.Cat.Context;
-
+/**
+ * RPC调用监控
+ *
+ * @author: heyongliu
+ * @date: 2022/4/18
+ */
 public class RpcLogviewTest {
 
-	@Before
-	public void setUp() {
-		new File(Cat.getCatHome(),"cat-cat.mark").delete();
-	}
+    @Before
+    public void setUp() {
+        new File(Cat.getCatHome(), "cat-cat.mark").delete();
+    }
 
-	@Test
-	public void testClientMessage() throws InterruptedException {
-		for (int i = 0; i < 1000; i++) {
-			Transaction t = Cat.newTransaction("test", "test");
-			final Map<String, String> map = new HashMap<String, String>();
-			Context ctx = new Context() {
+    @Test
+    public void testClientMessage() throws InterruptedException {
+        for (int i = 0; i < 1000; i++) {
+            Transaction t = Cat.newTransaction("test", "test");
+            final Map<String, String> map = new HashMap<>();
+            Context ctx = new Context() {
 
-				@Override
-				public String getProperty(String key) {
-					return map.get(key);
-				}
+                @Override
+                public String getProperty(String key) {
+                    return map.get(key);
+                }
 
-				@Override
-				public void addProperty(String key, String value) {
-					map.put(key, value);
-				}
-			};
-			Cat.logRemoteCallClient(ctx);
+                @Override
+                public void addProperty(String key, String value) {
+                    map.put(key, value);
+                }
+            };
+            Cat.logRemoteCallClient(ctx);
+            System.out.println(Cat.getManager().getThreadLocalMessageTree());
+            t.complete();
+        }
+        Thread.sleep(1000);
+    }
 
-			System.out.println(Cat.getManager().getThreadLocalMessageTree());
-			t.complete();
-		}
+    @Test
+    public void testServerMessage() throws InterruptedException {
+        for (int i = 0; i < 1000; i++) {
+            Transaction t = Cat.newTransaction("test", "test");
+            final Map<String, String> map = new HashMap<>();
+            final String msgId = Cat.getCurrentMessageId();
+            Context ctx = new Context() {
 
-		Thread.sleep(1000);
-	}
+                @Override
+                public String getProperty(String key) {
+                    return msgId;
+                }
 
-	@Test
-	public void testServerMessage() throws InterruptedException {
-		for (int i = 0; i < 1000; i++) {
-			Transaction t = Cat.newTransaction("test", "test");
-			final Map<String, String> map = new HashMap<String, String>();
-			final String msgId = Cat.getCurrentMessageId();
-			Context ctx = new Context() {
-
-				@Override
-				public String getProperty(String key) {
-					return msgId;
-				}
-
-				@Override
-				public void addProperty(String key, String value) {
-					map.put(key, value);
-				}
-			};
-			Cat.logRemoteCallServer(ctx);
-
-			System.out.println(Cat.getManager().getThreadLocalMessageTree());
-			t.complete();
-		}
-
-		Thread.sleep(1000);
-	}
-
+                @Override
+                public void addProperty(String key, String value) {
+                    map.put(key, value);
+                }
+            };
+            Cat.logRemoteCallServer(ctx);
+            System.out.println(Cat.getManager().getThreadLocalMessageTree());
+            t.complete();
+        }
+        Thread.sleep(1000);
+    }
 }

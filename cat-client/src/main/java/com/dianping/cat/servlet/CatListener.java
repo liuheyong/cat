@@ -18,28 +18,34 @@
  */
 package com.dianping.cat.servlet;
 
+import com.dianping.cat.Cat;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.File;
 
-import com.dianping.cat.Cat;
-
+/**
+ * cat客户端启动入口
+ *
+ * @author: heyongliu
+ * @date: 2022/4/15
+ */
 public class CatListener implements ServletContextListener {
-	@Override
-	public void contextDestroyed(ServletContextEvent sce) {
-		Cat.destroy();
-	}
 
-	@Override
-	public void contextInitialized(ServletContextEvent sce) {
-		ServletContext ctx = sce.getServletContext();
-		String catClientXml = ctx.getInitParameter("cat-client-xml");
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        Cat.destroy();
+    }
 
-		if (catClientXml == null) {
-			catClientXml = new File(Cat.getCatHome(), "client.xml").getPath();
-		}
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        ServletContext ctx = sce.getServletContext();
+        String catClientXml = ctx.getInitParameter("cat-client-xml");
 
-		Cat.initialize(new File(catClientXml));
-	}
+        if (catClientXml == null) {
+            catClientXml = new File(Cat.getCatHome(), "client.xml").getPath();
+        }
+        Cat.initialize(new File(catClientXml));
+    }
 }

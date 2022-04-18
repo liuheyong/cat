@@ -32,6 +32,7 @@ package com.dianping.cat.message;
  * @see Event, Heartbeat, Transaction
  */
 public interface Message {
+
     String SUCCESS = "0";
 
     /**
@@ -74,11 +75,32 @@ public interface Message {
     String getStatus();
 
     /**
+     * Set the message status.
+     *
+     * @param status message status. "0" means success, otherwise error code.
+     */
+    void setStatus(String status);
+
+    /**
+     * Set the message status with exception class name.
+     *
+     * @param e exception.
+     */
+    void setStatus(Throwable e);
+
+    /**
      * The time stamp the message was created.
      *
      * @return message creation time stamp in milliseconds
      */
     long getTimestamp();
+
+    /**
+     * Set the message timestamp
+     *
+     * @param timestamp
+     */
+    void setTimestamp(long timestamp);
 
     /**
      * Message type.
@@ -112,29 +134,8 @@ public interface Message {
     boolean isSuccess();
 
     /**
-     * Set the message status.
-     *
-     * @param status message status. "0" means success, otherwise error code.
-     */
-    void setStatus(String status);
-
-    /**
-     * Set the message status with exception class name.
-     *
-     * @param e exception.
-     */
-    void setStatus(Throwable e);
-
-    /**
      * Set the message  success status.
      */
     void setSuccessStatus();
-
-    /**
-     * Set the message timestamp
-     *
-     * @param timestamp
-     */
-    void setTimestamp(long timestamp);
 
 }

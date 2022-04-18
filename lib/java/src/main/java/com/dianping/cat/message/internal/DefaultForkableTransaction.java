@@ -32,23 +32,7 @@ public class DefaultForkableTransaction extends AbstractMessage implements Forka
     private String rootMessageId;
     private String parentMessageId;
     private long durationInMicros;
-    private List<Message> children = Collections.synchronizedList(new ArrayList<Message>());
-
-    private static String generateThreadName() {
-        String threadName = Thread.currentThread().getName();
-        if (threadName.startsWith("qtp")) {
-            int index = threadName.indexOf(" ");
-            if (index > -1) {
-                threadName = threadName.substring(0, index);
-            }
-        }
-
-        if (threadName.length() > 80) {
-            threadName = "ThreadID-" + String.valueOf(Thread.currentThread().getId());
-        }
-
-        return threadName;
-    }
+    private List<Message> children = Collections.synchronizedList(new ArrayList<>());
 
     public DefaultForkableTransaction(String rootMessageId, String parentMessageId) {
         super("System", "Forkable");
@@ -59,6 +43,20 @@ public class DefaultForkableTransaction extends AbstractMessage implements Forka
 
         setStatus(Message.SUCCESS);
         addData("thread-name=" + generateThreadName());
+    }
+
+    private static String generateThreadName() {
+        String threadName = Thread.currentThread().getName();
+        if (threadName.startsWith("qtp")) {
+            int index = threadName.indexOf(" ");
+            if (index > -1) {
+                threadName = threadName.substring(0, index);
+            }
+        }
+        if (threadName.length() > 80) {
+            threadName = "ThreadID-" + Thread.currentThread().getId();
+        }
+        return threadName;
     }
 
     @Override
@@ -89,7 +87,6 @@ public class DefaultForkableTransaction extends AbstractMessage implements Forka
     @Override
     public synchronized ForkedTransaction doFork() {
         DefaultForkedTransaction child = new DefaultForkedTransaction(rootMessageId, parentMessageId);
-
         if (isCompleted()) {
             // NOTES: if root message has already been serialized & sent out,
             // then the parent will NEVER see this child, but this child can see the parent
@@ -121,12 +118,21 @@ public class DefaultForkableTransaction extends AbstractMessage implements Forka
     }
 
     @Override
+    public void setDurationInMicros(long durationInMicros) {
+        this.durationInMicros = durationInMicros;
+    }
+
+    @Override
     public long getDurationInMillis() {
         if (super.isCompleted()) {
             return durationInMicros / 1000L;
         } else {
             return 0;
         }
+    }
+
+    public void setDurationInMillis(long durationInMillis) {
+        durationInMicros = durationInMillis * 1000L;
     }
 
     @Override
@@ -137,15 +143,6 @@ public class DefaultForkableTransaction extends AbstractMessage implements Forka
     @Override
     public boolean hasChildren() {
         return children != null && children.size() > 0;
-    }
-
-    @Override
-    public void setDurationInMicros(long durationInMicros) {
-        this.durationInMicros = durationInMicros;
-    }
-
-    public void setDurationInMillis(long durationInMillis) {
-        durationInMicros = durationInMillis * 1000L;
     }
 
     @Override

@@ -18,10 +18,6 @@
  */
 package com.dianping.cat;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
 import com.dianping.cat.message.EventTest;
 import com.dianping.cat.message.HeartbeatTest;
 import com.dianping.cat.message.TransactionTest;
@@ -29,33 +25,36 @@ import com.dianping.cat.message.internal.MessageIdFactoryTest;
 import com.dianping.cat.message.internal.MockMessageBuilderTest;
 import com.dianping.cat.message.internal.MultiThreadingTest;
 import com.dianping.cat.servlet.CatFilterTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
 
-/* .message */
+        /* .message */
 
-						EventTest.class,
+        EventTest.class,
 
-						HeartbeatTest.class,
+        HeartbeatTest.class,
 
-						TransactionTest.class,
+        TransactionTest.class,
 
-						MockMessageBuilderTest.class,
+        MockMessageBuilderTest.class,
 
-/* .servlet */
-						CatFilterTest.class,
+        /* .servlet */
+        CatFilterTest.class,
 
-/* .tool */
-						ToolsTest.class,
+        /* .tool */
+        ToolsTest.class,
 
-						CatTest.class,
+        CatTest.class,
 
-						MessageIdFactoryTest.class,
+        MessageIdFactoryTest.class,
 
-						MockMessageBuilderTest.class,
+        MockMessageBuilderTest.class,
 
-						MultiThreadingTest.class
+        MultiThreadingTest.class
 
 })
 public class AllTests {

@@ -51,7 +51,7 @@ public class DefaultForkedTransaction extends AbstractMessage implements ForkedT
     @Override
     public Transaction addChild(Message message) {
         if (children == null) {
-            children = new ArrayList<Message>();
+            children = new ArrayList<>();
         }
 
         children.add(message);
@@ -124,6 +124,10 @@ public class DefaultForkedTransaction extends AbstractMessage implements ForkedT
         }
     }
 
+    public void setDurationInMicros(long duration) {
+        durationInMicros = duration;
+    }
+
     @Override
     public long getDurationInMillis() {
         if (super.isCompleted()) {
@@ -134,8 +138,18 @@ public class DefaultForkedTransaction extends AbstractMessage implements ForkedT
     }
 
     @Override
+    public void setDurationInMillis(long duration) {
+        durationInMicros = duration;
+    }
+
+    @Override
     public String getMessageId() {
         return messageId;
+    }
+
+    @Override
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 
     @Override
@@ -169,22 +183,8 @@ public class DefaultForkedTransaction extends AbstractMessage implements ForkedT
         }
     }
 
-    public void setDurationInMicros(long duration) {
-        durationInMicros = duration;
-    }
-
-    @Override
-    public void setDurationInMillis(long duration) {
-        durationInMicros = duration;
-    }
-
     @Override
     public void setDurationStart(long durationStart) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
     }
 }
